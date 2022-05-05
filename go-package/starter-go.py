@@ -56,6 +56,54 @@ def weakDeroulementRandom(b):
     weakDeroulementRandom(b)
     b.pop()
 
+def minmax(b,ismin=True,prof=0):
+    if b.is_game_over():
+        return b.result()[0]
+    if prof>0:
+        return b.compute_score()[0]
+
+    if ismin:
+        best_score = -99999
+        choices = list(b.generate_legal_moves())
+        for c in choices:
+            b.push(c)
+            score = int(minmax(b,False,prof+1))
+            b.pop()
+            best_score = max(best_score,score)
+        
+        return best_score
+    else:
+        
+        best_score = 99999
+        choices = list(b.generate_legal_moves())
+        for c in choices:
+            b.push(c)
+            score = int(minmax(b,True,prof+1))
+            b.pop()
+            best_score = min(best_score,score)
+    
+        return best_score
+def bestMove(b): 
+    best_score = -9999
+    for c in list(b.generate_legal_moves()):
+        b.push(c)
+        print("calculating score")
+        score = int(minmax(b,False,0))
+        print("score is " , score," and best score is ", best_score)
+        b.pop()
+        if score > best_score:
+            best_score = score
+            best_move = c
+    return best_move
+
 board = Goban.Board()
+board.push(randomMove(board))
+board.pretty_print()
+print("score ",board.compute_score())
+# print("minmax ",minmax(board,True,0))
+print("possibilities ", list(board.generate_legal_moves()))
+bm = bestMove(board)
+print("best move ", bm)
+board.push(bm)
 board.pretty_print()
 # deroulementRandom(board)
