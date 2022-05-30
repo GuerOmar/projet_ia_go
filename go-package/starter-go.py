@@ -1,6 +1,7 @@
 import time
 import Goban
 from random import choice
+import math
 
 def randomMove(b):
     '''Renvoie un mouvement au hasard sur la liste des mouvements possibles. Pour avoir un choix au hasard, il faut
@@ -56,11 +57,16 @@ def weakDeroulementRandom(b):
     weakDeroulementRandom(b)
     b.pop()
 
+def Evaluate_board(b):
+    if(b.player_name == "black"):
+        return b.compute_score()[0]
+    return b.compute_score()[1]
+
 def minmax(b,ismin=True,prof=0):
     if b.is_game_over():
         return b.result()[0]
     if prof>0:
-        return b.compute_score()[0]
+        return Evaluate_board(b)
 
     if ismin:
         best_score = -99999
@@ -83,27 +89,88 @@ def minmax(b,ismin=True,prof=0):
             best_score = min(best_score,score)
     
         return best_score
+
+def alpha_beta(b,ismin=True,prof = 0,alpha=-math.inf,beta=math.inf):
+    if b.is_game_over():
+        return b.result()[0]
+    if prof>0:
+        return Evaluate_board(b)
+
+    
+    if ismin:
+        best_score = - math.inf
+        choices = list(b.generate_legal_moves())
+        for c in choices:
+            b.push(c)
+            score = int(alpha_beta(b,False,prof+1,alpha,beta))
+            b.pop()
+            best_score = max(best_score,score)
+            alpha = max(alpha,best_score)
+            if alpha >= best_score :
+                return best_score
+    
+        return best_score
+    else:
+        
+        best_score = math.inf
+        choices = list(b.generate_legal_moves())
+        for c in choices:
+            b.push(c)
+            score = int(alpha_beta(b,True,prof+1,alpha,beta))
+            b.pop()
+            best_score = min(best_score,score)
+            beta = min(beta,best_score)
+            if alpha >= best_score :
+                return best_score
+    
+        return best_score
+
 def bestMove(b): 
-    best_score = -9999
-    for c in list(b.generate_legal_moves()):
-        b.push(c)
-        print("calculating score")
-        score = int(minmax(b,False,0))
-        print("score is " , score," and best score is ", best_score)
-        b.pop()
-        if score > best_score:
-            best_score = score
-            best_move = c
+    best_score = - math.inf
+    deja_vu = set()
+    best_move = 0
+    while(len(deja_vu)< (len(b.generate_legal_moves()) //2)):
+        c = randomMove(b)
+        if(c not in deja_vu):
+            b.push(c)
+            score = int(alpha_beta(b,False,0,-math.inf,math.inf))
+            b.pop()
+            deja_vu.add(c)
+            if score > best_score:
+                best_score = score
+                best_move = c
+    # for c in list(b.generate_legal_moves()):
+    #     # print("calculating score")
+    #     score = int(minmax(b,False,0))
+    #     # print("score is " , score," and best score is ", best_score)
+    #     b.pop()
+    #     if score > best_score:
+    #         best_score = score
+    #         best_move = c
     return best_move
 
 board = Goban.Board()
-board.push(randomMove(board))
+# board.push(randomMove(board))
 board.pretty_print()
 print("score ",board.compute_score())
 # print("minmax ",minmax(board,True,0))
-print("possibilities ", list(board.generate_legal_moves()))
+# print("possibilities ", list(board.generate_legal_moves()))
 bm = bestMove(board)
 print("best move ", bm)
 board.push(bm)
 board.pretty_print()
 # deroulementRandom(board)
+
+
+while(not board.is_game_over()):
+    
+    bm = bestMove(board)
+    board.push(bm)
+    board.pretty_print()
+    board.push(randomMove(board))
+    board.pretty_print()
+    print("best move ", bm)
+    print("game is over ? : ",board.is_game_over())
+
+if board.is_game_over():
+    print("Resultat : ", board.result())
