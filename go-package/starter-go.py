@@ -3,7 +3,7 @@ import Goban
 from random import choice
 import math
 import Model
-
+model = Model.import_model()
 def randomMove(b):
     '''Renvoie un mouvement au hasard sur la liste des mouvements possibles. Pour avoir un choix au hasard, il faut
     construire explicitement tous les mouvements. Or, generate_legal_moves() peut nous donner un itérateur (quand on
@@ -60,11 +60,11 @@ def weakDeroulementRandom(b):
 
 def Evaluate_board(b):
     if(b.player_name == "black"):
-        
+
         #return b.compute_score()[0]
-        return Model.predection(b._historyMoveNames)
+        return Model.predection(b._historyMoveNames,model)
     #return b.compute_score()[1]
-    return 1 - Model.predection(b._historyMoveNames)
+    return 1 - Model.predection(b._historyMoveNames,model)
 
 def minmax(b,ismin=True,prof=0):
     if b.is_game_over():

@@ -126,9 +126,10 @@ def transform_data(data):
       X_data = np.array(X)
       return X_data
 
-def predection(data):
-    data = data[:1]
-    model = keras.models.load_model("/home/sana/Documents/Intelligence_artificielle/projet_ia_go/go-package/my_model.h5")
+def import_model():
+      model = keras.models.load_model("/home/sana/Documents/Intelligence_artificielle/projet_ia_go/go-package/my_model.h5")
+      return model
+def predection(data,model):
     y_predicted = model.predict(transform_data(data))
     return y_predicted
 #Entrainer()
