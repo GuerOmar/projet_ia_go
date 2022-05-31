@@ -2,6 +2,7 @@ import time
 import Goban
 from random import choice
 import math
+import Model
 
 def randomMove(b):
     '''Renvoie un mouvement au hasard sur la liste des mouvements possibles. Pour avoir un choix au hasard, il faut
@@ -38,7 +39,7 @@ def weakDeroulementRandom(b):
     '''Déroulement d'une partie de go au hasard des coups possibles. Cela va donner presque exclusivement
     des parties très longues. Cela illustre cependant comment on peut jouer avec la librairie
     très simplement en utilisant les coups weak_legal_moves().
-    
+
     Ce petit exemple montre comment utiliser weak_legal_moves() plutot que legal_moves(). Vous y gagnerez en efficacité.'''
 
     print("----------")
@@ -49,7 +50,7 @@ def weakDeroulementRandom(b):
 
     while True:
         # push peut nous renvoyer faux si le coup demandé n'est pas valide à cause d'un superKo. Dans ce cas il faut
-        # faire un pop() avant de retenter un nouveau coup 
+        # faire un pop() avant de retenter un nouveau coup
         valid = b.push(weakRandomMove(b))
         if valid:
             break
@@ -59,8 +60,11 @@ def weakDeroulementRandom(b):
 
 def Evaluate_board(b):
     if(b.player_name == "black"):
-        return b.compute_score()[0]
-    return b.compute_score()[1]
+        
+        #return b.compute_score()[0]
+        return Model.predection(b._historyMoveNames)
+    #return b.compute_score()[1]
+    return 1 - Model.predection(b._historyMoveNames)
 
 def minmax(b,ismin=True,prof=0):
     if b.is_game_over():
@@ -76,10 +80,10 @@ def minmax(b,ismin=True,prof=0):
             score = int(minmax(b,False,prof+1))
             b.pop()
             best_score = max(best_score,score)
-        
+
         return best_score
     else:
-        
+
         best_score = 99999
         choices = list(b.generate_legal_moves())
         for c in choices:
@@ -87,7 +91,7 @@ def minmax(b,ismin=True,prof=0):
             score = int(minmax(b,True,prof+1))
             b.pop()
             best_score = min(best_score,score)
-    
+
         return best_score
 
 def alpha_beta(b,ismin=True,prof = 0,alpha=-math.inf,beta=math.inf):
@@ -96,7 +100,7 @@ def alpha_beta(b,ismin=True,prof = 0,alpha=-math.inf,beta=math.inf):
     if prof>0:
         return Evaluate_board(b)
 
-    
+
     if ismin:
         best_score = - math.inf
         choices = list(b.generate_legal_moves())
@@ -108,10 +112,10 @@ def alpha_beta(b,ismin=True,prof = 0,alpha=-math.inf,beta=math.inf):
             alpha = max(alpha,best_score)
             if alpha >= best_score :
                 return best_score
-    
+
         return best_score
     else:
-        
+
         best_score = math.inf
         choices = list(b.generate_legal_moves())
         for c in choices:
@@ -122,10 +126,10 @@ def alpha_beta(b,ismin=True,prof = 0,alpha=-math.inf,beta=math.inf):
             beta = min(beta,best_score)
             if alpha >= best_score :
                 return best_score
-    
+
         return best_score
 
-def bestMove(b): 
+def bestMove(b):
     best_score = - math.inf
     deja_vu = set()
     best_move = 0
@@ -163,7 +167,7 @@ board.pretty_print()
 
 
 while(not board.is_game_over()):
-    
+
     bm = bestMove(board)
     board.push(bm)
     board.pretty_print()
