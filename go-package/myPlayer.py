@@ -29,7 +29,6 @@ class myPlayer(PlayerInterface):
  
 
     def alphaBeta(self,board,isMaxi, depth,alpha,beta,startingTime,deadline) :
-        
         legalMoves = board.generate_legal_moves()
         result = self.evaluate(board)
         currentTime =time()
@@ -40,7 +39,7 @@ class myPlayer(PlayerInterface):
             return result
         if (self.cutoff or board.is_game_over() or (depth == 0) or (len(legalMoves) == 0) or (result >= 20000) or (result <= -20000)) :
             return result
-        if (isMaxi):
+        if isMaxi:
             for m in legalMoves :
                 board.push(m)
                 alpha = max([alpha, self.alphaBeta(board, depth - 1,False, alpha, beta, startingTime, deadline)])
@@ -57,8 +56,8 @@ class myPlayer(PlayerInterface):
                 if (beta <= alpha) :
                     break
             return beta
-    def IDS(self,board,deadline):
-        
+
+    def Iterate(self,board,deadline):
         begin = time()
         finishTime = begin + deadline
         depth = 1
@@ -77,24 +76,11 @@ class myPlayer(PlayerInterface):
 
     def NextMove(self,board):
 
-        # if len(self.starting)>0:
-        #     move = self.starting[0]
-        #     self.starting.remove(move)
-        #     print("move ... ", move)
-        #     return move
-
-
-
-        # for i in self.starting:            
-        #     self.starting.remove(i)
-        #     print("boardiiiiii : ",board[i])
-        #     if board[i]:
-        #         return i
         myChoiceMove = None
         maximum =float("-inf")
         beginTime = time()
         legalMoves = board.generate_legal_moves()
-        #remove PASS
+
         legalMoves.remove(-1)
         shuffle(legalMoves)
         if (len(legalMoves)<81) :
@@ -111,19 +97,18 @@ class myPlayer(PlayerInterface):
         if len(legalMoves)>0 :
             for m in legalMoves :
                 board.push(m)
-                limitSearchTime =((self.TIME_LIMIT) / len(legalMoves))
-                gain = self.IDS(board, limitSearchTime)
+                value = self.Iterate(board, ((self.TIME_LIMIT) / len(legalMoves)))
                 board.pop()
 
-                if (gain >= 20000) :
+                if (value >= 20000) :
                     return (m)
-                if (gain > maximum) :
-                    maximum = gain
+                if (value > maximum) :
+                    maximum = value
                     myChoiceMove = m
           
         else :
             myChoiceMove=-1
-        print("tooked time for choosing move :",time()-beginTime, " score=",maximum ," choice " , myChoiceMove)
+        
         return myChoiceMove
     
     @staticmethod
@@ -176,6 +161,7 @@ class myPlayer(PlayerInterface):
                     oppo_group.append(v)
         return(my_group,oppo_group)
 
+    @staticmethod
     def getGroupLiberties (b,gr,oppo,i=0) :
         k=[]
         for i in gr :
@@ -192,6 +178,7 @@ class myPlayer(PlayerInterface):
                 liberties_degree+=1
         return (liberties_degree)
 
+    @staticmethod
     def getAllGroupsLiberties(b,groups,oppo) :
         v=[]
         for group in groups :
@@ -239,17 +226,17 @@ class myPlayer(PlayerInterface):
                 win_score+=len(my_groups[me])*my_groups_liberties[me]+my_groups_liberties[me]*5+20
         for op in range(len(oppo_groups)) :
             win_score=win_score-len(oppo_groups[op])*oppo_groups_librties[op] 
-        # Calculate scores for groups 
         my_groups_2liberties=my_groups_liberties.count(2)
         oppo_groups_2liberties= oppo_groups_librties.count(2)
         groups_score =oppo_groups_2liberties- my_groups_2liberties
-        # calcule liberties's score
         liberties_group=sum(my_groups_liberties)-sum(oppo_groups_librties)
-
         return win_score + groups_score  + liberties_group 
+
     def getPlayerName(self):
         return "Omar & Sana"
+
     def getPlayerMove(self):
+
         self.TIME_LIMIT=0.5
         self.cutoff=False
 
